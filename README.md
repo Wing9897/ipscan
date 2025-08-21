@@ -1,200 +1,102 @@
+<p align="center">
+    <img src="assets/banner.svg" alt="ipscan banner" width="100%" />
+</p>
+
+<div align="center">
+
 # ipscan
 
-Fast IP scanner — multithreaded Ping and ARP scanning for Windows
+Fast IP scanner — multithreaded Ping and ARP for Windows
 
-Language: English | 繁體中文 (Traditional Chinese)
+[![PyPI version](https://img.shields.io/pypi/v/ipscan?logo=pypi&label=PyPI)](https://pypi.org/project/ipscan/) 
+![Python](https://img.shields.io/pypi/pyversions/ipscan?logo=python) 
+![OS](https://img.shields.io/badge/OS-Windows-blue?logo=windows) 
+![License](https://img.shields.io/github/license/Wing9897/ipscan?color=success)
 
-- English (current)
-- Traditional Chinese: README.zh-TW.md
+Language:
+[English](README.md) · [繁體中文](README.zh-TW.md) · [简体中文](README.zh-CN.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Deutsch](README.de.md) · [Français](README.fr.md) · [Italiano](README.it.md) · [Español](README.es.md) · [Português BR](README.pt-BR.md) · [Русский](README.ru.md)
 
----
-
-## English
-
-Fast IP scanner — multithreaded Ping and ARP scanning for Windows
-
-### Installation
-
-```bash
-pip install ipscan
-```
-
-### Usage
-
-#### Ping scan
-
-```python
-from ipscan import ping_range, PingScanner
-
-# Scan an IP range
-online_hosts = ping_range("192.168.1.1", "192.168.1.254")
-print(f"Online hosts: {online_hosts}")
-
-# Class-based API
-scanner = PingScanner(timeout=1.0)
-results = scanner.scan_range("10.0.0.1", "10.0.0.100")
-```
-
-#### ARP scan
-
-```python
-from ipscan import arp_range, ArpScanner
-
-# Scan an IP range and get MAC addresses
-host_info = arp_range("192.168.1.1", "192.168.1.254")
-for ip, mac in host_info.items():
-    print(f"{ip} -> {mac}")
-
-# Class-based API
-scanner = ArpScanner()
-results = scanner.scan_range("10.0.0.1", "10.0.0.100")
-```
-
-#### CLI tools
-
-```bash
-# High-speed continuous ping (interactive)
-fping
-
-# Simple range scans
-sping
-sarp
-```
-
-### Features
-
-- Multithreaded scanning for high speed
-- Supports both Ping and ARP scans
-- Progress bar display
-- Clean, minimal API
-
-### Requirements
-
-- Python 3.7+
-- Windows (required for ARP scan)
+</div>
 
 ---
 
-## 繁體中文
+## Table of contents
 
-快速IP掃描工具 - 多線程 Ping 和 ARP 掃描（Windows）
+- Quick start
+- Features
+- CLI tools
+- Python API
+- Performance notes
+- Requirements
+- Contributing
 
-### 安裝
+---
 
-```bash
-pip install ipscan
-```
+## Quick start
 
-### 使用方法
-
-#### Ping 掃描
-
-```python
-from ipscan import ping_range, PingScanner
-
-# 掃描 IP 範圍
-online_hosts = ping_range("192.168.1.1", "192.168.1.254")
-print(f"在線主機: {online_hosts}")
-
-# 使用類接口
-scanner = PingScanner(timeout=1.0)
-results = scanner.scan_range("10.0.0.1", "10.0.0.100")
-```
-
-#### ARP 掃描
-
-```python
-from ipscan import arp_range, ArpScanner
-
-# 掃描 IP 範圍並獲取 MAC 地址
-host_info = arp_range("192.168.1.1", "192.168.1.254")
-for ip, mac in host_info.items():
-    print(f"{ip} -> {mac}")
-
-# 使用類接口
-scanner = ArpScanner()
-results = scanner.scan_range("10.0.0.1", "10.0.0.100")
-```
-
-#### 命令行工具
-
-```bash
-# 高速連續 Ping（互動式）
-fping
-
-# 範圍掃描
-sping
-sarp
-```
-
-### 特點
-
-- 多線程掃描，速度極快（Ping 掃描 65535 個裝置約 30–60 秒；ARP 掃描約 15–30 秒）
-- 支援 Ping 與 ARP 掃描
-- 顯示進度條
-- 簡潔的 API 設計
-
-### 系統需求
-
-- Python 3.7+
-- Windows（ARP 掃描需要）
-
-## Installation
+Install from PyPI:
 
 ```bash
 pip install ipscan
 ```
 
-## Usage
+### CLI
 
-### Ping scan
+```bash
+fping           # High-speed continuous ping (interactive)
+sping           # Simple range ping scan
+sarp            # ARP range scan (Windows)
+```
+
+### Python API
+
+Ping scan:
 
 ```python
 from ipscan import ping_range, PingScanner
 
-# Scan an IP range
 online_hosts = ping_range("192.168.1.1", "192.168.1.254")
-print(f"Online hosts: {online_hosts}")
 
-# Class-based API
 scanner = PingScanner(timeout=1.0)
 results = scanner.scan_range("10.0.0.1", "10.0.0.100")
 ```
 
-### ARP scan
+ARP scan:
 
 ```python
 from ipscan import arp_range, ArpScanner
 
-# Scan an IP range and get MAC addresses
 host_info = arp_range("192.168.1.1", "192.168.1.254")
 for ip, mac in host_info.items():
-    print(f"{ip} -> {mac}")
+        print(f"{ip} -> {mac}")
 
-# Class-based API
 scanner = ArpScanner()
 results = scanner.scan_range("10.0.0.1", "10.0.0.100")
-```
-
-### CLI tools
-
-```bash
-# High-speed continuous ping (interactive)
-fping
-
-# Simple range scans
-sping
-sarp
 ```
 
 ## Features
 
 - Multithreaded scanning for high speed
-- Supports both Ping and ARP scans
-- Progress bar display
-- Clean, minimal API
+- Ping and ARP scans with simple API
+- Progress bar and clean output
+- Tiny dependency footprint
+
+## Performance notes
+
+- Ping: scans /24 in a few seconds on typical hardware
+- ARP: very fast on local network (Windows only)
 
 ## Requirements
 
 - Python 3.7+
-- Windows (required for ARP scan)
+- Windows required for ARP
+
+## Contributing
+
+Issues and PRs are welcome. If you like this project, consider starring it.
+
+---
+
+<div align="center">
+Made with ❤️ for network tinkerers.
+</div>
