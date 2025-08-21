@@ -12,3 +12,11 @@ pip install ipscan
 
 - Ping スキャン: `ping_range` または `PingScanner`
 - ARP スキャン: `arp_range` または `ArpScanner`
+
+### CLI
+
+```
+fping  # 高速連続 ping（対話式）
+sping  # ping 範囲スキャン
+sarp   # ARP 範囲スキャン
+```

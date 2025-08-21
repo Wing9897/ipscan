@@ -53,11 +53,12 @@ results = scanner.scan_range("10.0.0.1", "10.0.0.100")
 #### CLI tools
 
 ```bash
-# Ping scan
+# High-speed continuous ping (interactive)
 fping
 
-# ARP scan
-farp
+# Simple range scans
+sping
+sarp
 ```
 
 ### Features
@@ -118,11 +119,12 @@ results = scanner.scan_range("10.0.0.1", "10.0.0.100")
 #### 命令行工具
 
 ```bash
-# Ping 掃描
+# 高速連續 Ping（互動式）
 fping
 
-# ARP 掃描
-farp
+# 範圍掃描
+sping
+sarp
 ```
 
 ### 特點
@@ -177,11 +179,12 @@ results = scanner.scan_range("10.0.0.1", "10.0.0.100")
 ### CLI tools
 
 ```bash
-# Ping scan
+# High-speed continuous ping (interactive)
 fping
 
-# ARP scan
-farp
+# Simple range scans
+sping
+sarp
 ```
 
 ## Features
