@@ -64,6 +64,11 @@ setuptools.setup(
         'ping3>=4.0.0',
         'tqdm>=4.60.0',
     ],
+    extras_require={
+        'arp': [
+            'scapy>=2.4.5'
+        ]
+    },
     classifiers=[
         "Development Status :: 5 - Production/Stable",
     # License classifier removed (deprecated). Use SPDX expression via `license` instead.
