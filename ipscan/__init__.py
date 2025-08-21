@@ -1,9 +1,10 @@
-__version__ = "1.0.1"
+__version__ = "1.1.0"
 __author__ = "Wing"
 __email__ = "tomt99688@gmail.com"
 
-from .ping import PingScanner, ping_range, ping_list
-from .arp import ArpScanner, arp_range, arp_list
+# New canonical module names
+from .sping import PingScanner, ping_range, ping_list
+from .sarp import ArpScanner, arp_range, arp_list
 
 __all__ = [
     'PingScanner', 'ping_range', 'ping_list',

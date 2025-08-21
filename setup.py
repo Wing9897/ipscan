@@ -43,7 +43,7 @@ def get_version():
         for line in f:
             if line.startswith("__version__"):
                 return line.split("=")[1].strip().strip('"').strip("'")
-    return "1.0.0"
+    return "1.0.2"
 
 setuptools.setup(
     name="ipscan",
@@ -85,8 +85,9 @@ setuptools.setup(
     python_requires='>=3.7',
     entry_points={
         'console_scripts': [
-            'fping=ipscan.ping:main',
-            'farp=ipscan.arp:main',
+            'fping=ipscan.fping:main',
+            'sarp=ipscan.sarp:main',
+            'sping=ipscan.sping:main',
         ]
     },
     keywords="ip scan ping arp network scanner",

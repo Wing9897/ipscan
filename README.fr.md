@@ -12,3 +12,11 @@ pip install ipscan
 
 - Ping scan : `ping_range` ou `PingScanner`
 - ARP scan : `arp_range` ou `ArpScanner`
+
+### CLI
+
+```
+fping  # ping continu haute vitesse (interactif)
+sping  # scan d'intervalle par ping
+sarp   # scan d'intervalle par ARP
+```
