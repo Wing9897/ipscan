@@ -66,7 +66,7 @@ setuptools.setup(
     ],
     classifiers=[
         "Development Status :: 5 - Production/Stable",
-        "License :: OSI Approved :: MIT License",
+    # License classifier removed (deprecated). Use SPDX expression via `license` instead.
         "Operating System :: Microsoft :: Windows",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.7",
@@ -79,6 +79,9 @@ setuptools.setup(
     "Natural Language :: English",
     "Natural Language :: Chinese (Traditional)",
     ],
+    # Use an SPDX license expression and include the LICENSE file in built distributions
+    license="MIT",
+    license_files=("LICENSE",),
     python_requires='>=3.7',
     entry_points={
         'console_scripts': [
