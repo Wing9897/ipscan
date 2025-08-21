@@ -43,7 +43,7 @@ def get_version():
         for line in f:
             if line.startswith("__version__"):
                 return line.split("=")[1].strip().strip('"').strip("'")
-    return "1.0.2"
+    return "0.0.0"
 
 setuptools.setup(
     name="ipscan",
