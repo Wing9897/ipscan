@@ -45,7 +45,7 @@ pip install ipscan
 ```bash
 fping           # ping continu haute vitesse (interactif)
 sping           # scan de plage par ping
-sarp            # scan de plage ARP (Windows)
+sarp            # scan de plage ARP
 ```
 
 ### API Python
@@ -84,12 +84,12 @@ results = scanner.scan_range("10.0.0.1", "10.0.0.100")
 ## Performances
 
 - Ping : /24 en quelques secondes (selon le matériel)
-- ARP : très rapide sur le LAN (Windows uniquement)
+- ARP : très rapide sur le LAN
 
 ## Prérequis
 
 - Python 3.7+
-- Windows (requis pour ARP)
+- Windows / Linux / macOS pris en charge ; sous Linux/macOS, ARP s'appuie sur les outils système (ip/arp/arping)
 
 ## Contribution
 
