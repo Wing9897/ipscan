@@ -1,5 +1,5 @@
 <p align="center">
-	<img src="assets/banner.svg" alt="ipscan banner" width="100%" />
+	<img src="https://raw.githubusercontent.com/Wing9897/ipscan/main/assets/banner.svg" alt="ipscan banner" width="100%" />
 </p>
 
 <div align="center">
