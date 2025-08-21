@@ -45,7 +45,7 @@ pip install ipscan
 ```bash
 fping           # 高速連續 Ping（互動式）
 sping           # 範圍 Ping 掃描
-sarp            # ARP 範圍掃描（Windows）
+sarp            # ARP 範圍掃描
 ```
 
 ### Python API
@@ -84,12 +84,12 @@ results = scanner.scan_range("10.0.0.1", "10.0.0.100")
 ## 效能說明
 
 - Ping：/24 子網數秒內完成（依硬體而異）
-- ARP：在本地網路極快（僅 Windows）
+- ARP：在本地網路極快
 
 ## 系統需求
 
 - Python 3.7+
-- Windows（ARP 功能需要）
+- Windows / Linux / macOS 皆可；Linux/macOS 使用系統工具（ip/arp/arping）
 
 ## 參與貢獻
 

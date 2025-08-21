@@ -2,6 +2,9 @@ import ctypes
 import threading
 import ipaddress
 import time
+import platform
+import subprocess
+import re
 from tqdm import tqdm
 from typing import List, Dict, Optional
 
@@ -12,7 +15,14 @@ class ArpScanner:
 		self.results: Dict[str, str] = {}
 		self.results_lock = threading.Lock()
 
-	def get_mac(self, ip: str) -> Optional[str]:
+	def _run_cmd(self, args: List[str], timeout: float = 2.0) -> str:
+		try:
+			out = subprocess.check_output(args, stderr=subprocess.STDOUT, timeout=timeout)
+			return out.decode('utf-8', errors='ignore')
+		except Exception:
+			return ""
+
+	def _get_mac_windows(self, ip: str) -> Optional[str]:
 		try:
 			iphlpapi = ctypes.windll.iphlpapi
 			inet_addr = ctypes.windll.ws2_32.inet_addr
@@ -23,9 +33,58 @@ class ArpScanner:
 			res = SendARP(dest_ip, 0, ctypes.byref(mac_addr), ctypes.byref(mac_addr_len))
 			if res == 0:
 				return ':'.join('%02x' % b for b in mac_addr.raw[:6])
-			return None
 		except Exception:
-			return None
+			pass
+		return None
+
+	def _parse_mac(self, text: str) -> Optional[str]:
+		m = re.search(r"([0-9A-Fa-f]{2}(:|-)){5}[0-9A-Fa-f]{2}", text)
+		return m.group(0).replace('-', ':').lower() if m else None
+
+	def _get_mac_linux(self, ip: str) -> Optional[str]:
+		# 1) Try ip neigh
+		txt = self._run_cmd(["ip", "neigh", "show", ip])
+		mac = self._parse_mac(txt)
+		if mac:
+			return mac
+		# 2) Try to nudge ARP: ping once then read again
+		self._run_cmd(["ping", "-c", "1", "-W", "1", ip], timeout=1.5)
+		txt = self._run_cmd(["ip", "neigh", "show", ip])
+		mac = self._parse_mac(txt)
+		if mac:
+			return mac
+		# 3) Fallback to arp -n
+		txt = self._run_cmd(["arp", "-n", ip])
+		mac = self._parse_mac(txt)
+		if mac:
+			return mac
+		# 4) Best-effort arping (may require sudo on some systems); try both -w/-W variants
+		self._run_cmd(["arping", "-c", "1", "-w", "1", ip], timeout=2.0)
+		txt = self._run_cmd(["ip", "neigh", "show", ip]) or self._run_cmd(["arp", "-n", ip])
+		return self._parse_mac(txt)
+
+	def _get_mac_macos(self, ip: str) -> Optional[str]:
+		# macOS: use arp -n directly; if empty, ping once to populate cache
+		txt = self._run_cmd(["arp", "-n", ip])
+		mac = self._parse_mac(txt)
+		if mac:
+			return mac
+		# Ping once; macOS ping doesn't support -W as Linux; keep short count
+		self._run_cmd(["ping", "-c", "1", ip], timeout=1.5)
+		txt = self._run_cmd(["arp", "-n", ip])
+		return self._parse_mac(txt)
+
+	def get_mac(self, ip: str) -> Optional[str]:
+		osname = platform.system().lower()
+		if osname == 'windows':
+			return self._get_mac_windows(ip)
+		if osname == 'linux':
+			return self._get_mac_linux(ip)
+		if osname == 'darwin':
+			return self._get_mac_macos(ip)
+		# Unknown OS: best-effort using arp -n
+		txt = self._run_cmd(["arp", "-n", ip])
+		return self._parse_mac(txt)
 
 	def scan_ip(self, ip: str, pbar: Optional[tqdm] = None) -> None:
 		mac = self.get_mac(ip)
