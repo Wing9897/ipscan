@@ -40,6 +40,12 @@ Install from PyPI:
 pip install ipscan
 ```
 
+Optional: enable raw ARP engine with scapy support
+
+```bash
+pip install "ipscan[arp]"
+```
+
 ### CLI
 
 ```bash
@@ -81,6 +87,26 @@ results = scanner.scan_range("10.0.0.1", "10.0.0.100")
 - Progress bar and clean output
 - Tiny dependency footprint
 
+### ARP engines
+
+- system (default):
+    - Windows: WinAPI SendARP
+    - Linux/macOS: ip neigh / arp -n, with a one-off ping or arping to populate cache
+- scapy: raw ARP broadcast via scapy (fast, requires admin/root and Npcap on Windows)
+- auto: use scapy when available/allowed, else fallback to system
+
+Select engine in code:
+
+```python
+from ipscan import arp_range
+hosts = arp_range("192.168.1.1","192.168.1.254", engine="scapy", interface="eth0")
+```
+
+CLI will also prompt for engine/interface; you can set environment variables:
+
+- IPSCAN_ARP_ENGINE=system|scapy|auto
+- IPSCAN_ARP_IFACE=eth0
+
 ## Performance notes
 
 - Ping: scans /24 in a few seconds on typical hardware
@@ -90,6 +116,7 @@ results = scanner.scan_range("10.0.0.1", "10.0.0.100")
 
 - Python 3.7+
 - Windows / Linux / macOS supported; on Linux/macOS, ARP uses system tools (ip/arp/arping)
+ - For scapy engine: root/admin (Linux/macOS) or Npcap (Windows)
 
 ## Contributing
 

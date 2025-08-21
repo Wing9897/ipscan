@@ -81,6 +81,12 @@ results = scanner.scan_range("10.0.0.1", "10.0.0.100")
 - 進度條與清晰輸出
 - 相依套件少、易於安裝
 
+### ARP 引擎
+
+- system（預設）：Windows 用 SendARP；Linux/macOS 讀鄰居表（必要時用 ping/arping 觸發）
+- scapy：以原始 ARP 廣播（最快；需管理員/root，Windows 需 Npcap）
+- auto：可用時優先 scapy，否則回退 system
+
 ## 效能說明
 
 - Ping：/24 子網數秒內完成（依硬體而異）
