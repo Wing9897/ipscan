@@ -6,11 +6,11 @@
 
 # ipscan
 
-快速 IP 掃描器 — 多線程 Ping 與 ARP（Windows）
+快速 IP 掃描器 — 跨平台多線程 Ping 與 ARP 掃描（Windows、Linux、macOS）
 
 [![PyPI 版本](https://img.shields.io/pypi/v/ipscan?logo=pypi&label=PyPI)](https://pypi.org/project/ipscan/)
 ![Python](https://img.shields.io/pypi/pyversions/ipscan?logo=python)
-![OS](https://img.shields.io/badge/OS-Windows-blue?logo=windows)
+![OS](https://img.shields.io/badge/OS-Windows%20%7C%20Linux%20%7C%20macOS-blue)
 ![授權](https://img.shields.io/github/license/Wing9897/ipscan?color=success)
 
 語言：
@@ -39,6 +39,13 @@
 ```bash
 pip install ipscan
 ```
+
+**Windows 用戶**：安裝可選的 Windows 優化 ping 支援：
+```bash
+pip install "ipscan[windows]"
+```
+
+**注意**：Linux ARP 掃描需要 sudo 權限以獲得最佳效能。
 
 ### 命令列
 
@@ -76,26 +83,51 @@ results = scanner.scan_range("10.0.0.1", "10.0.0.100")
 
 ## 功能特色
 
-- 多線程高速掃描
-- 支援 Ping 與 ARP，API 簡潔
-- 進度條與清晰輸出
-- 相依套件少、易於安裝
+- **跨平台支援**：Windows、Linux、macOS 自動偵測作業系統
+- **多線程掃描**：高速並發操作
+- **智慧實現**：針對平台優化以獲得最佳效能
+  - Windows：原生 SendARP API + ping3 函式庫
+  - Linux：直接 scapy ARP 封包 + 系統 ping
+  - macOS：系統 arp + ping 命令
+- **簡單 API**：跨平台統一介面
+- **進度追蹤**：即時進度條與清晰輸出
 
-### ARP 引擎
+## 平台詳細資訊
 
-- system（預設）：Windows 用 SendARP；Linux/macOS 讀鄰居表（必要時用 ping/arping 觸發）
-- scapy：以原始 ARP 廣播（最快；需管理員/root，Windows 需 Npcap）
-- auto：可用時優先 scapy，否則回退 system
+| 功能 | Windows | Linux | macOS |
+|------|---------|-------|---------|
+| **Ping 掃描** | ping3 函式庫 | 系統 ping | 系統 ping |
+| **ARP 掃描** | SendARP API | scapy 封包 | arp 命令 |
+| **權限需求** | 無需特殊權限 | ARP 需要 sudo | 無需特殊權限 |
+| **效能** | 優化 | 優化 | 良好 |
+## 使用範例
 
-## 效能說明
+### Linux ARP 掃描（需要 sudo）
+```bash
+sudo sarp
+# 提示時輸入 IP 範圍
+```
 
-- Ping：/24 子網數秒內完成（依硬體而異）
-- ARP：在本地網路極快
+### 高速連續 ping
+```bash
+fping
+# 輸入目標 IP 和間隔
+```
+
+### 範圍 ping 掃描
+```bash
+sping
+# 輸入起始和結束 IP 地址
+```
 
 ## 系統需求
 
-- Python 3.7+
-- Windows / Linux / macOS 皆可；Linux/macOS 使用系統工具（ip/arp/arping）
+- **Python 3.7+**
+- **跨平台支援**：Windows、Linux、macOS
+- **相依性**：
+  - `tqdm`（進度條）
+  - `scapy`（ARP 封包生成）
+  - `ping3`（Windows 優化，可選）
 
 ## 參與貢獻
 

@@ -6,11 +6,11 @@
 
 # ipscan
 
-Fast IP scanner — multithreaded Ping and ARP for Windows
+Fast IP scanner — multithreaded Ping and ARP scanning (Windows, Linux, macOS)
 
-[![PyPI version](https://img.shields.io/pypi/v/ipscan?logo=pypi&label=PyPI)](https://pypi.org/project/ipscan/) 
-![Python](https://img.shields.io/pypi/pyversions/ipscan?logo=python) 
-![OS](https://img.shields.io/badge/OS-Windows-blue?logo=windows) 
+[![PyPI version](https://img.shields.io/pypi/v/ipscan?logo=pypi&label=PyPI)](https://pypi.org/project/ipscan/)
+![Python](https://img.shields.io/pypi/pyversions/ipscan?logo=python)
+![OS](https://img.shields.io/badge/OS-Windows%20%7C%20Linux%20%7C%20macOS-blue)
 ![License](https://img.shields.io/github/license/Wing9897/ipscan?color=success)
 
 Language:
@@ -40,11 +40,12 @@ Install from PyPI:
 pip install ipscan
 ```
 
-Optional: enable raw ARP engine with scapy support
-
+**Windows users**: Install optional Windows-optimized ping support:
 ```bash
-pip install "ipscan[arp]"
+pip install "ipscan[windows]"
 ```
+
+**Note**: Linux ARP scanning requires sudo privileges for optimal performance.
 
 ### CLI
 
@@ -82,41 +83,52 @@ results = scanner.scan_range("10.0.0.1", "10.0.0.100")
 
 ## Features
 
-- Multithreaded scanning for high speed
-- Ping and ARP scans with simple API
-- Progress bar and clean output
-- Tiny dependency footprint
+- **Cross-platform**: Windows, Linux, macOS support with automatic OS detection
+- **Multithreaded scanning**: High-speed concurrent operations
+- **Smart implementations**: Platform-optimized for best performance
+  - Windows: Native SendARP API + ping3 library
+  - Linux: Direct scapy ARP packets + system ping
+  - macOS: System arp + ping commands
+- **Simple API**: Unified interface across all platforms
+- **Progress tracking**: Real-time progress bars and clean output
 
-### ARP engines
+## Platform Details
 
-- system (default):
-    - Windows: WinAPI SendARP
-    - Linux/macOS: ip neigh / arp -n, with a one-off ping or arping to populate cache
-- scapy: raw ARP broadcast via scapy (fast, requires admin/root and Npcap on Windows)
-- auto: use scapy when available/allowed, else fallback to system
+| Feature | Windows | Linux | macOS |
+|---------|---------|-------|-------|
+| **Ping scanning** | ping3 library | system ping | system ping |
+| **ARP scanning** | SendARP API | scapy packets | arp command |
+| **Permissions** | No special permissions | sudo for ARP | No special permissions |
+| **Performance** | Optimized | Optimized | Good |
 
-Select engine in code:
+## Usage Examples
 
-```python
-from ipscan import arp_range
-hosts = arp_range("192.168.1.1","192.168.1.254", engine="scapy", interface="eth0")
+### Linux ARP scanning (requires sudo)
+```bash
+sudo sarp
+# Enter IP range when prompted
 ```
 
-CLI will also prompt for engine/interface; you can set environment variables:
+### High-speed continuous ping
+```bash
+fping
+# Enter target IP and interval
+```
 
-- IPSCAN_ARP_ENGINE=system|scapy|auto
-- IPSCAN_ARP_IFACE=eth0
-
-## Performance notes
-
-- Ping: scans /24 in a few seconds on typical hardware
-- ARP: very fast on local networks
+### Range ping scanning
+```bash
+sping
+# Enter start and end IP addresses
+```
 
 ## Requirements
 
-- Python 3.7+
-- Windows / Linux / macOS supported; on Linux/macOS, ARP uses system tools (ip/arp/arping)
- - For scapy engine: root/admin (Linux/macOS) or Npcap (Windows)
+- **Python 3.7+**
+- **Cross-platform support**: Windows, Linux, macOS
+- **Dependencies**:
+  - `tqdm` (progress bars)
+  - `scapy` (ARP packet generation)
+  - `ping3` (Windows optimization, optional)
 
 ## Contributing
 

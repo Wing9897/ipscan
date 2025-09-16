@@ -61,18 +61,20 @@ setuptools.setup(
     },
     packages=setuptools.find_packages(),
     install_requires=[
-        'ping3>=4.0.0',
         'tqdm>=4.60.0',
+        'scapy>=2.4.5',
     ],
     extras_require={
-        'arp': [
-            'scapy>=2.4.5'
+        'windows': [
+            'ping3>=4.0.0'
         ]
     },
     classifiers=[
         "Development Status :: 5 - Production/Stable",
     # License classifier removed (deprecated). Use SPDX expression via `license` instead.
         "Operating System :: Microsoft :: Windows",
+        "Operating System :: POSIX :: Linux",
+        "Operating System :: MacOS",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
