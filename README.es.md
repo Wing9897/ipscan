@@ -10,7 +10,7 @@ Escáner IP rápido — Ping y ARP multihilo (Windows)
 
 [![PyPI](https://img.shields.io/pypi/v/ipscan?logo=pypi&label=PyPI)](https://pypi.org/project/ipscan/)
 ![Python](https://img.shields.io/pypi/pyversions/ipscan?logo=python)
-![OS](https://img.shields.io/badge/OS-Windows-blue?logo=windows)
+![OS](https://img.shields.io/badge/OS-Windows%20%7C%20Linux%20%7C%20macOS-blue)
 ![Licencia](https://img.shields.io/github/license/Wing9897/ipscan?color=success)
 
 Idioma:
