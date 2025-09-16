@@ -66,9 +66,20 @@ class PingScanner:
 
     def scan_range(self, start_ip: str, end_ip: str) -> Set[str]:
         self.results.clear()
+
+        # 驗證 IP 地址格式
+        try:
+            start_addr = ipaddress.IPv4Address(start_ip)
+            end_addr = ipaddress.IPv4Address(end_ip)
+        except ipaddress.AddressValueError as e:
+            raise ValueError(f"無效的 IP 地址格式|Invalid IP address format: {e}")
+
+        if int(start_addr) > int(end_addr):
+            raise ValueError("起始 IP 應小於或等於結束 IP|Start IP should be less than or equal to end IP")
+
         ip_addresses = [str(ipaddress.IPv4Address(ip)) for ip in range(
-            int(ipaddress.IPv4Address(start_ip)),
-            int(ipaddress.IPv4Address(end_ip)) + 1
+            int(start_addr),
+            int(end_addr) + 1
         )]
 
         pbar = tqdm(total=len(ip_addresses), desc="Ping掃描|Ping Scan", ncols=80) if self.show_progress else None
@@ -114,9 +125,44 @@ def ping_list(ip_list: List[str], timeout: float = 1.0, show_progress: bool = Tr
     return PingScanner(timeout=timeout, show_progress=show_progress).scan_list(ip_list)
 
 
+def validate_ip_address(ip: str) -> bool:
+    """驗證 IP 地址格式是否正確"""
+    try:
+        ipaddress.IPv4Address(ip)
+        return True
+    except ipaddress.AddressValueError:
+        return False
+
+
+def validate_ip_range(start_ip: str, end_ip: str) -> bool:
+    """驗證 IP 範圍是否有效"""
+    try:
+        start = int(ipaddress.IPv4Address(start_ip))
+        end = int(ipaddress.IPv4Address(end_ip))
+        return start <= end
+    except ipaddress.AddressValueError:
+        return False
+
+
 def main():
-    start_ip = input('請輸入起始 IP 地址|Start IP: ')
-    end_ip = input('請輸入結束 IP 地址|End IP: ')
+    start_ip = input('請輸入起始 IP 地址|Start IP: ').strip()
+    end_ip = input('請輸入結束 IP 地址|End IP: ').strip()
+
+    # 驗證 IP 地址格式
+    if not validate_ip_address(start_ip):
+        print('無效的起始 IP 地址格式|Invalid start IP address format')
+        print('範例|Example: 192.168.1.1')
+        return
+
+    if not validate_ip_address(end_ip):
+        print('無效的結束 IP 地址格式|Invalid end IP address format')
+        print('範例|Example: 192.168.1.254')
+        return
+
+    # 驗證 IP 範圍
+    if not validate_ip_range(start_ip, end_ip):
+        print('無效的 IP 範圍，起始 IP 應小於或等於結束 IP|Invalid IP range, start IP should be less than or equal to end IP')
+        return
 
     start_time = time.time()
     print(f"開始掃描從 {start_ip} 到 {end_ip} 的 IP 地址...|Starting scan from {start_ip} to {end_ip}...")

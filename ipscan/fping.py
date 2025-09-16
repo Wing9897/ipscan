@@ -1,6 +1,7 @@
 import time
 import platform
 import subprocess
+import ipaddress
 
 
 def _ping_windows(target: str, timeout_s: float = 1.0) -> tuple:
@@ -74,6 +75,15 @@ def _ping_linux(target: str, timeout_s: float = 1.0) -> tuple:
         return False, None
 
 
+def validate_ip_address(ip: str) -> bool:
+    """驗證 IP 地址格式是否正確"""
+    try:
+        ipaddress.IPv4Address(ip)
+        return True
+    except ipaddress.AddressValueError:
+        return False
+
+
 def cross_platform_ping(target: str, timeout_s: float = 1.0) -> tuple:
     """跨平台 ping 實現"""
     os_type = platform.system().lower()
@@ -88,6 +98,11 @@ def main():
     target = input('請輸入目標 IP 位址|Enter target IP: ').strip()
     if not target:
         print('目標 IP 不可為空|Target IP cannot be empty')
+        return
+
+    if not validate_ip_address(target):
+        print('無效的 IP 地址格式|Invalid IP address format')
+        print('範例|Example: 192.168.1.1')
         return
 
     try:

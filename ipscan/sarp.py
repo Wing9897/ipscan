@@ -5,6 +5,8 @@ import time
 import platform
 import subprocess
 import re
+import os
+import sys
 from tqdm import tqdm
 from typing import List, Dict, Optional
 
@@ -118,9 +120,20 @@ class ArpScanner:
 
     def scan_range(self, start_ip: str, end_ip: str) -> Dict[str, str]:
         self.results.clear()
+
+        # 驗證 IP 地址格式
+        try:
+            start_addr = ipaddress.IPv4Address(start_ip)
+            end_addr = ipaddress.IPv4Address(end_ip)
+        except ipaddress.AddressValueError as e:
+            raise ValueError(f"無效的 IP 地址格式|Invalid IP address format: {e}")
+
+        if int(start_addr) > int(end_addr):
+            raise ValueError("起始 IP 應小於或等於結束 IP|Start IP should be less than or equal to end IP")
+
         ip_list = [str(ipaddress.IPv4Address(ip)) for ip in range(
-            int(ipaddress.IPv4Address(start_ip)),
-            int(ipaddress.IPv4Address(end_ip)) + 1
+            int(start_addr),
+            int(end_addr) + 1
         )]
 
         pbar = tqdm(total=len(ip_list), desc="ARP掃描|ARP Scan", ncols=80) if self.show_progress else None
@@ -166,9 +179,71 @@ def arp_list(ip_list: List[str], show_progress: bool = True) -> Dict[str, str]:
     return ArpScanner(show_progress=show_progress).scan_list(ip_list)
 
 
+def validate_ip_address(ip: str) -> bool:
+    """驗證 IP 地址格式是否正確"""
+    try:
+        ipaddress.IPv4Address(ip)
+        return True
+    except ipaddress.AddressValueError:
+        return False
+
+
+def validate_ip_range(start_ip: str, end_ip: str) -> bool:
+    """驗證 IP 範圍是否有效"""
+    try:
+        start = int(ipaddress.IPv4Address(start_ip))
+        end = int(ipaddress.IPv4Address(end_ip))
+        return start <= end
+    except ipaddress.AddressValueError:
+        return False
+
+
+def check_sudo_permission():
+    """檢查是否有 sudo 權限（Linux）"""
+    if platform.system().lower() == 'linux':
+        if os.geteuid() != 0:
+            print("=" * 60)
+            print("⚠️  Linux ARP 掃描需要 sudo 權限 | ARP scan requires sudo on Linux")
+            print("=" * 60)
+            print("\n請使用以下命令執行 | Please run with:")
+            print(f"\n  sudo {sys.executable} -m ipscan.sarp")
+
+            # 如果在虛擬環境中，提供更精確的指令
+            if hasattr(sys, 'real_prefix') or (hasattr(sys, 'base_prefix') and sys.base_prefix != sys.prefix):
+                print(f"  或 | or")
+                print(f"  sudo {sys.executable} {sys.argv[0]}")
+
+            print("\n提示 | Tip: 您也可以給 Python 添加網路權限:")
+            print(f"  sudo setcap cap_net_raw+ep {sys.executable}")
+            print("  然後可以直接運行 sarp")
+            print("=" * 60)
+            return False
+    return True
+
+
 def main():
-    start_ip = input('請輸入起始 IP 地址|Start IP: ')
-    end_ip = input('請輸入結束 IP 地址|End IP: ')
+    # Linux 平台檢查 sudo 權限
+    if not check_sudo_permission():
+        sys.exit(1)
+
+    start_ip = input('請輸入起始 IP 地址|Start IP: ').strip()
+    end_ip = input('請輸入結束 IP 地址|End IP: ').strip()
+
+    # 驗證 IP 地址格式
+    if not validate_ip_address(start_ip):
+        print('無效的起始 IP 地址格式|Invalid start IP address format')
+        print('範例|Example: 192.168.1.1')
+        return
+
+    if not validate_ip_address(end_ip):
+        print('無效的結束 IP 地址格式|Invalid end IP address format')
+        print('範例|Example: 192.168.1.254')
+        return
+
+    # 驗證 IP 範圍
+    if not validate_ip_range(start_ip, end_ip):
+        print('無效的 IP 範圍，起始 IP 應小於或等於結束 IP|Invalid IP range, start IP should be less than or equal to end IP')
+        return
 
     start_time = time.time()
     print(f"開始掃描從 {start_ip} 到 {end_ip} 的 IP 地址...|Starting scan from {start_ip} to {end_ip}...")
