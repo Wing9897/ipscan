@@ -81,6 +81,29 @@ results = scanner.scan_range("10.0.0.1", "10.0.0.100")
 - Прогресс-бар и чистый вывод
 - Минимум зависимостей
 
+## Настройка Linux (рекомендуется)
+
+Для лучшей производительности на Linux предоставьте Python права на raw socket:
+
+```bash
+# Включить быстрый Ping-скан (raw ICMP socket, ~100x быстрее)
+sudo setcap cap_net_raw+ep $(readlink -f $(which python3))
+
+# Включить быстрый Ping + ARP скан
+sudo setcap cap_net_raw,cap_net_admin+ep $(readlink -f $(which python3))
+```
+
+Без этой настройки:
+- **Ping-скан** работает, но использует subprocess (медленнее)
+- **ARP-скан** требует `sudo`
+
+Восстановить (удалить разрешение):
+```bash
+sudo setcap -r $(readlink -f $(which python3))
+```
+
+> **Примечание**: Нужно сделать только один раз для каждой установки Python. При использовании virtualenv выполните команду для Python-бинарника venv.
+
 ## Производительность
 
 - Ping: /24 за считанные секунды (зависит от железа)

@@ -81,6 +81,29 @@ results = scanner.scan_range("10.0.0.1", "10.0.0.100")
 - Barre de progression, sortie claire
 - Peu de dépendances
 
+## Configuration Linux (recommandé)
+
+Pour de meilleures performances sous Linux, accordez les permissions raw socket à Python :
+
+```bash
+# Activer le scan Ping rapide (raw ICMP socket, ~100x plus rapide)
+sudo setcap cap_net_raw+ep $(readlink -f $(which python3))
+
+# Activer le scan Ping + ARP rapide
+sudo setcap cap_net_raw,cap_net_admin+ep $(readlink -f $(which python3))
+```
+
+Sans cette configuration :
+- **Scan Ping** fonctionne mais utilise subprocess (plus lent)
+- **Scan ARP** nécessite `sudo`
+
+Restaurer (supprimer la permission) :
+```bash
+sudo setcap -r $(readlink -f $(which python3))
+```
+
+> **Note** : À faire une seule fois par installation Python. Pour un virtualenv, exécuter sur le binaire Python du venv.
+
 ## Performances
 
 - Ping : /24 en quelques secondes (selon le matériel)

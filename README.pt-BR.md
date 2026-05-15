@@ -81,6 +81,29 @@ results = scanner.scan_range("10.0.0.1", "10.0.0.100")
 - Barra de progresso e saída limpa
 - Poucas dependências
 
+## Configuração Linux (recomendado)
+
+Para melhor desempenho no Linux, conceda permissões de raw socket ao Python:
+
+```bash
+# Habilitar varredura Ping rápida (raw ICMP socket, ~100x mais rápido)
+sudo setcap cap_net_raw+ep $(readlink -f $(which python3))
+
+# Habilitar varredura Ping + ARP rápida
+sudo setcap cap_net_raw,cap_net_admin+ep $(readlink -f $(which python3))
+```
+
+Sem esta configuração:
+- **Varredura Ping** funciona mas usa subprocess (mais lento)
+- **Varredura ARP** requer `sudo`
+
+Restaurar (remover a permissão):
+```bash
+sudo setcap -r $(readlink -f $(which python3))
+```
+
+> **Nota**: Só precisa ser feito uma vez por instalação Python. Com virtualenv, executar no binário Python do venv.
+
 ## Desempenho
 
 - Ping: /24 em poucos segundos (depende do hardware)

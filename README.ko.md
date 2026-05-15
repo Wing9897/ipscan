@@ -81,6 +81,29 @@ results = scanner.scan_range("10.0.0.1", "10.0.0.100")
 - 진행 표시 및 깔끔한 출력
 - 의존성 최소화
 
+## Linux 설정 (권장)
+
+Linux에서 최고 성능을 위해 Python에 raw socket 권한을 부여하세요:
+
+```bash
+# 고속 Ping 스캔 활성화 (raw ICMP socket, ~100배 빠름)
+sudo setcap cap_net_raw+ep $(readlink -f $(which python3))
+
+# 고속 Ping + ARP 스캔 활성화
+sudo setcap cap_net_raw,cap_net_admin+ep $(readlink -f $(which python3))
+```
+
+미설정 시:
+- **Ping 스캔**은 작동하지만 subprocess로 폴백 (느림)
+- **ARP 스캔**은 `sudo`가 필요
+
+권한 복원 (제거):
+```bash
+sudo setcap -r $(readlink -f $(which python3))
+```
+
+> **참고**: Python 설치당 한 번만 설정하면 됩니다. virtualenv 사용 시 venv의 Python에 대해 실행하세요.
+
 ## 성능 안내
 
 - Ping: /24 몇 초 내 스캔(환경에 따라 다름)
