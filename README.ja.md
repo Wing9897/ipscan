@@ -81,6 +81,29 @@ results = scanner.scan_range("10.0.0.1", "10.0.0.100")
 - 進行バーつきの分かりやすい出力
 - 依存が少なく導入が容易
 
+## Linux セットアップ（推奨）
+
+Linux で最高のパフォーマンスを得るには、Python に raw socket 権限を付与してください：
+
+```bash
+# 高速 Ping スキャンを有効化（raw ICMP socket、約100倍高速化）
+sudo setcap cap_net_raw+ep $(readlink -f $(which python3))
+
+# 高速 Ping + ARP スキャンを有効化
+sudo setcap cap_net_raw,cap_net_admin+ep $(readlink -f $(which python3))
+```
+
+未設定の場合：
+- **Ping スキャン** は動作しますが subprocess にフォールバック（低速）
+- **ARP スキャン** は `sudo` が必要
+
+権限を元に戻す（削除）：
+```bash
+sudo setcap -r $(readlink -f $(which python3))
+```
+
+> **注意**：Python インストールごとに一度だけ設定すれば OK です。virtualenv 使用時は venv の Python に対して実行してください。
+
 ## パフォーマンス
 
 - Ping：/24 を数秒でスキャン（環境による）

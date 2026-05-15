@@ -6,8 +6,14 @@ import subprocess
 from tqdm import tqdm
 from typing import List, Set, Optional
 
+from ipscan import icmp_ping
+
 
 class PingScanner:
+    # 類別層級旗標：是否已顯示過權限回退提示
+    _fallback_warned: bool = False
+    _fallback_warned_lock = threading.Lock()
+
     def __init__(self, timeout: float = 1.0, show_progress: bool = True):
         self.timeout = timeout
         self.show_progress = show_progress
@@ -26,8 +32,27 @@ class PingScanner:
             return self._ping_system(ip_address)
 
     def _ping_linux(self, ip_address: str) -> bool:
-        """Linux: 使用系統 ping 命令 (無需 sudo)"""
-        return self._ping_system(ip_address)
+        """Linux: 優先使用 raw ICMP socket，無權限時回退到系統 ping"""
+        try:
+            success, _rtt = icmp_ping.raw_ping(ip_address, timeout=self.timeout)
+            return success
+        except PermissionError:
+            self._warn_permission_fallback()
+            return self._ping_system(ip_address)
+
+    def _warn_permission_fallback(self) -> None:
+        """在首次回退時輸出權限提示訊息（僅顯示一次）"""
+        if not PingScanner._fallback_warned:
+            with PingScanner._fallback_warned_lock:
+                if not PingScanner._fallback_warned:
+                    PingScanner._fallback_warned = True
+                    print(
+                        "[提示] 無法使用 raw ICMP socket（需要 root 權限或 cap_net_raw），"
+                        "已回退到系統 ping 命令。\n"
+                        "[Hint] Raw ICMP socket unavailable (requires root or cap_net_raw), "
+                        "falling back to system ping command.\n"
+                        "  提升效能|Improve performance: sudo setcap cap_net_raw+ep $(readlink -f $(which python3))"
+                    )
 
     def _ping_system(self, ip_address: str) -> bool:
         """通用系統 ping 命令"""

@@ -45,7 +45,7 @@ pip install ipscan
 pip install "ipscan[windows]"
 ```
 
-**Note**: Linux ARP scanning requires sudo privileges for optimal performance.
+**Note**: Linux users — see [Linux Setup](#linux-setup-recommended) below for best performance.
 
 ### CLI
 
@@ -92,14 +92,37 @@ results = scanner.scan_range("10.0.0.1", "10.0.0.100")
 - **Simple API**: Unified interface across all platforms
 - **Progress tracking**: Real-time progress bars and clean output
 
+## Linux Setup (Recommended)
+
+For best performance on Linux, grant Python raw socket capabilities:
+
+```bash
+# Enable fast Ping scanning (raw ICMP socket, ~100x faster)
+sudo setcap cap_net_raw+ep $(readlink -f $(which python3))
+
+# Enable fast Ping + ARP scanning
+sudo setcap cap_net_raw,cap_net_admin+ep $(readlink -f $(which python3))
+```
+
+Without this step:
+- **Ping scanning** still works but falls back to subprocess (slower)
+- **ARP scanning** requires `sudo` to run
+
+To remove the capability (restore default):
+```bash
+sudo setcap -r $(readlink -f $(which python3))
+```
+
+> **Note**: This only needs to be done once per Python installation. If using a virtualenv, run the command against the venv's Python binary.
+
 ## Platform Details
 
 | Feature | Windows | Linux | macOS |
 |---------|---------|-------|-------|
-| **Ping scanning** | ping3 library | system ping | system ping |
+| **Ping scanning** | ping3 library | raw ICMP socket (with setcap) / system ping (fallback) | system ping |
 | **ARP scanning** | SendARP API | scapy packets | arp command |
-| **Permissions** | No special permissions | sudo for ARP | No special permissions |
-| **Performance** | Optimized | Optimized | Good |
+| **Permissions** | No special permissions | setcap recommended (see above) | No special permissions |
+| **Performance** | Optimized | Optimized (with setcap) | Good |
 
 ## Usage Examples
 

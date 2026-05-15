@@ -81,6 +81,29 @@ results = scanner.scan_range("10.0.0.1", "10.0.0.100")
 - 进度条与清晰输出
 - 依赖少，易安装
 
+## Linux 设置（推荐）
+
+为了在 Linux 上获得最佳性能，请授予 Python raw socket 权限：
+
+```bash
+# 启用快速 Ping 扫描（raw ICMP socket，约 100 倍提速）
+sudo setcap cap_net_raw+ep $(readlink -f $(which python3))
+
+# 启用快速 Ping + ARP 扫描
+sudo setcap cap_net_raw,cap_net_admin+ep $(readlink -f $(which python3))
+```
+
+若未设置：
+- **Ping 扫描** 仍可运行，但会回退到 subprocess（较慢）
+- **ARP 扫描** 需要 `sudo` 才能执行
+
+还原（移除权限）：
+```bash
+sudo setcap -r $(readlink -f $(which python3))
+```
+
+> **注意**：每个 Python 安装只需设置一次。若使用 virtualenv，请对 venv 的 Python 执行此命令。
+
 ## 性能说明
 
 - Ping：/24 子网数秒内完成（随硬件而异）

@@ -45,7 +45,7 @@ pip install ipscan
 pip install "ipscan[windows]"
 ```
 
-**注意**：Linux ARP 掃描需要 sudo 權限以獲得最佳效能。
+**注意**：Linux 用戶請參閱下方 [Linux 設定](#linux-設定建議) 以獲得最佳效能。
 
 ### 命令列
 
@@ -92,14 +92,37 @@ results = scanner.scan_range("10.0.0.1", "10.0.0.100")
 - **簡單 API**：跨平台統一介面
 - **進度追蹤**：即時進度條與清晰輸出
 
+## Linux 設定（建議）
+
+為了在 Linux 上獲得最佳效能，請授予 Python raw socket 權限：
+
+```bash
+# 啟用快速 Ping 掃描（raw ICMP socket，約 100 倍提速）
+sudo setcap cap_net_raw+ep $(readlink -f $(which python3))
+
+# 啟用快速 Ping + ARP 掃描
+sudo setcap cap_net_raw,cap_net_admin+ep $(readlink -f $(which python3))
+```
+
+若未設定：
+- **Ping 掃描** 仍可運作，但會回退到 subprocess（較慢）
+- **ARP 掃描** 需要 `sudo` 才能執行
+
+還原（移除權限）：
+```bash
+sudo setcap -r $(readlink -f $(which python3))
+```
+
+> **注意**：每個 Python 安裝只需設定一次。若使用 virtualenv，請對 venv 的 Python 執行此命令。
+
 ## 平台詳細資訊
 
 | 功能 | Windows | Linux | macOS |
 |------|---------|-------|---------|
-| **Ping 掃描** | ping3 函式庫 | 系統 ping | 系統 ping |
+| **Ping 掃描** | ping3 函式庫 | raw ICMP socket（需 setcap）/ 系統 ping（回退） | 系統 ping |
 | **ARP 掃描** | SendARP API | scapy 封包 | arp 命令 |
-| **權限需求** | 無需特殊權限 | ARP 需要 sudo | 無需特殊權限 |
-| **效能** | 優化 | 優化 | 良好 |
+| **權限需求** | 無需特殊權限 | 建議 setcap（見上方） | 無需特殊權限 |
+| **效能** | 優化 | 優化（需 setcap） | 良好 |
 ## 使用範例
 
 ### Linux ARP 掃描（需要 sudo）

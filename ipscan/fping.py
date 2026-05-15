@@ -2,6 +2,9 @@ import time
 import platform
 import subprocess
 import ipaddress
+import threading
+
+from ipscan import icmp_ping
 
 
 def _ping_windows(target: str, timeout_s: float = 1.0) -> tuple:
@@ -46,8 +49,38 @@ def _ping_system_windows(target: str, timeout_s: float = 1.0) -> tuple:
         return False, None
 
 
+# 模組層級旗標：是否已顯示過權限回退提示
+_fping_fallback_warned: bool = False
+_fping_fallback_warned_lock = threading.Lock()
+
+
+def _warn_fping_permission_fallback() -> None:
+    """在首次回退時輸出權限提示訊息（僅顯示一次）"""
+    global _fping_fallback_warned
+    if not _fping_fallback_warned:
+        with _fping_fallback_warned_lock:
+            if not _fping_fallback_warned:
+                _fping_fallback_warned = True
+                print(
+                    "[提示] 無法使用 raw ICMP socket（需要 root 權限或 cap_net_raw），"
+                    "已回退到系統 ping 命令。\n"
+                    "[Hint] Raw ICMP socket unavailable (requires root or cap_net_raw), "
+                    "falling back to system ping command.\n"
+                    "  提升效能|Improve performance: sudo setcap cap_net_raw+ep $(readlink -f $(which python3))"
+                )
+
+
 def _ping_linux(target: str, timeout_s: float = 1.0) -> tuple:
-    """Linux: 使用系統 ping 命令"""
+    """Linux: 優先使用 raw ICMP socket，無權限時回退到系統 ping"""
+    try:
+        return icmp_ping.raw_ping(target, timeout=timeout_s)
+    except PermissionError:
+        _warn_fping_permission_fallback()
+        return _ping_linux_subprocess(target, timeout_s)
+
+
+def _ping_linux_subprocess(target: str, timeout_s: float = 1.0) -> tuple:
+    """Linux: 使用系統 ping 命令（回退方式）"""
     try:
         result = subprocess.run(
             ['ping', '-c', '1', '-W', str(int(timeout_s)), target],
